@@ -30,7 +30,7 @@ public interface bankingCrud<M> {
     //check balance before withdrawing
     public double checkBal(int id)throws SQLException;
     //retrieve existing account_id
-    public int getAcc(int ss)throws SQLException;
+    public int getAcc(int ss, int id)throws SQLException;
 
 //update
     //deposit or withdraw funds

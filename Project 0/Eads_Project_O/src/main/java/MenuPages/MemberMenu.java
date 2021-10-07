@@ -1,4 +1,4 @@
-package Menus;
+package MenuPages;
 
 import DAOs.BankingDao;
 import models.Balance;
@@ -24,7 +24,7 @@ public class MemberMenu {
 
         Scanner incoming = new Scanner(System.in);
         System.out.println("\n\nWhat would you like to do today?\nB)  View Accounts\n" +
-                "D)  Make a Deposit\nW)  Make a Withdraw\nC)  Create a New Account");
+                "D)  Make a Deposit\nW)  Make a Withdraw\nC)  Create a New Account\nQ) Quit");
         input = incoming.next();
         input = Manipulation(input);
         input = input.substring(0,1);

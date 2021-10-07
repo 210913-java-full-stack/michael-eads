@@ -1,4 +1,4 @@
-package Menus;
+package MenuPages;
 
 import DAOs.BankingDao;
 import Exceptions.passwordFailedException;

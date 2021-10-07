@@ -1,8 +1,7 @@
 package utils;
 
 import Exceptions.SsnErrorException;
-import Menus.CreateUser;
-import Menus.CreateWithDep;
+import MenuPages.CreateWithDep;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -79,6 +78,9 @@ public class Reformat
         else if (input.length()!= 5){
             System.out.println("The account number is only five digits long.");
             CreateWithDep.createWithDep(choice, first, last, pw, ss);
+        }
+        else{
+            accNum = Integer.parseInt(input);
         }
         return accNum;
     }

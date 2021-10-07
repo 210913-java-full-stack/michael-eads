@@ -26,18 +26,16 @@ public class BankingDao implements bankingCrud {
         int newId = Integer.parseInt(stringId);
         return newId;
     }
-    public int getAcc2(int acc, int id) throws WrongBankingTypeException {
-        String sId;
+    public int getAcc2(int acc){
+        String sId; int id;
         String stringId = Integer.toString(acc);
 
         String sAcc = stringId.substring(0,3);
         String type = stringId.substring(3);
-        if(Integer.parseInt(type) ==id) {
-             sId = Integer.toString(id+10);
-        }
-        else{
-            sId = Integer.toString(id);
-        }
+
+        id = Integer.parseInt(type);
+        id = (id+10);
+        sId = Integer.toString(id);
         stringId = sAcc.concat(sId);
         int newId = Integer.parseInt(stringId);
         return newId;
@@ -81,8 +79,8 @@ public class BankingDao implements bankingCrud {
 
     @Override
     public boolean newAcc(int ss, int id, double money) throws SQLException, WrongBankingTypeException, IOException {
-        int acc = getAcc(ss);
-        int newAcc = getAcc2(acc, id);
+        int acc = getAcc(ss, id);
+        int newAcc = getAcc2(acc);
         //System.out.println(newAcc);
 
         conn = ConnectionManager.getConnection();
@@ -189,14 +187,19 @@ public class BankingDao implements bankingCrud {
     }
 
     @Override
-    public int getAcc(int ss) throws SQLException {
+    public int getAcc(int ss, int id) throws SQLException {
         int acc;
-        String statement = "SELECT account_id FROM accounts_customers ac WHERE last_four_ss = ?";
+        String statement = "";
+        if(id == 1){
+            statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%1'";
+        }else {
+             statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%2'";
+        }
         PreparedStatement account = conn.prepareStatement(statement);
         account.setInt(1,ss);
         ResultSet rs = account.executeQuery();
         if(rs.next()){
-            acc = rs.getInt("account_id");
+            acc = rs.getInt("max (account_id)");
             return acc;
         }return -1;
     }

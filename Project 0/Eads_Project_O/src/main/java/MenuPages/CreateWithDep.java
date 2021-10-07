@@ -1,4 +1,4 @@
-package Menus;
+package MenuPages;
 
 import DAOs.BankingDao;
 import Exceptions.WrongBankingTypeException;
@@ -27,26 +27,26 @@ public class CreateWithDep {
                 int acc = accountCheck(input, "D", first, last, pw, ss);
                 System.out.println("And how much are we depositing today?");
                 input = incoming.next();
-                if(negCheck(input)){
+                double input2 = Double.parseDouble(input);
+                if(input2 < 0) {
                     System.out.println("You cannot deposit a negative amount.");
-                    createWithDep("D", first,last,pw,ss);
+                    break;
                 }
                 else {
                     double money = depWithVer(input);
-                    try {
-                        Connection conn = ConnectionManager.getConnection();
-                        BankingDao dao = new BankingDao(conn);
-
-                        money = (dao.checkBal(acc) + money);
-                        System.out.println(money);
-
-                        if (dao.depWith(acc, money)) {
-                            balance(ss);
-                            MemberMenu.member(first, last, pw);
-                        }
-                    } catch (SQLException | IOException e) {
-                        System.out.println(e.getMessage());
-                    }
+                        try {
+                            conn = ConnectionManager.getConnection();
+                            BankingDao dao = new BankingDao(conn);
+                            //double bal = dao.checkBal(acc);
+                            money = dao.checkBal(acc)+money;
+                            if (dao.depWith(acc, money)) {
+                                balance(ss);
+                                MemberMenu.member(first, last, pw);
+                                }
+                            }
+                            catch (SQLException | IOException e) {
+                                System.out.println(e.getMessage());
+                            }
                 }
                 break;
             case "W"://withdraw
@@ -55,38 +55,35 @@ public class CreateWithDep {
                 input = incoming.next();
                 acc = accountCheck(input, "W", first, last, pw, ss);
                 System.out.println("And how much are we withdrawing today?");
-
-                Scanner incoming2 = new Scanner(System.in);
                 input = incoming.next();
-                int input2 = Integer.parseInt(input);
+                input2 = Double.parseDouble(input);
                 if(input2 < 0) {
                     System.out.println("You cannot deposit a negative amount.");
                     break;
-                }
-
-//                if(negCheck(input)){
-//                    System.out.println("You cannot deposit a negative amount.");
-//                    createWithDep("D", first,last,pw,ss);
-//                }
-                else {
+                } else {
                     double money = depWithVer(input);
                     try {
                         Connection conn = ConnectionManager.getConnection();
                         BankingDao dao = new BankingDao(conn);
-                        //double bal = dao.checkBal(acc);
-                        System.out.println(dao.checkBal(acc));
-                        //System.out.println("bal is "+bal);
-                        if (dao.checkBal(acc) <= money) {
+                        if (dao.checkBal(acc) >= money) {
                             money = dao.checkBal(acc) - money;
-                            if (dao.depWith(ss, money)) {
-                                balance(ss);
-                                MemberMenu.member(first, last, pw);
+                            try {
+                                conn = ConnectionManager.getConnection();
+                                dao = new BankingDao(conn);
+                                if (dao.depWith(acc, money)) {
+                                    balance(ss);
+                                    MemberMenu.member(first, last, pw);
+                                }
+                            }
+                            catch (SQLException | IOException e) {
+                                System.out.println(e.getMessage());
                             }
                         } else {
                             System.out.println("Sorry, that amount exceeds your available balance.");
                             createWithDep("W", first, last, pw, ss);
                         }
-                    } catch (SQLException | IOException e) {
+                    }
+                    catch (SQLException | IOException e) {
                         System.out.println(e.getMessage());
                     }
                 }
@@ -99,10 +96,10 @@ public class CreateWithDep {
                 input = input.substring(0,1);
                 int id = 0;
                 if(input.equals("C")){
-                    id = 11;
+                    id = 1;
                 }
                 else if(input.equals("S")){
-                id = 12;
+                    id = 2;
                 }
                 else{
                     System.out.println("You must enter a \"C\" or a \"S\".");
@@ -119,10 +116,7 @@ public class CreateWithDep {
                     try {
                         Connection conn = ConnectionManager.getConnection();
                         BankingDao dao = new BankingDao(conn);
-
-                        System.out.println("ID: "+id +" money: "+money);
-
-                        if (dao.newAcc(ss, id, money)) {
+                             if (dao.newAcc(ss, id, money)) {
                             MemberMenu.member(first, last, pw);
                         }
                     } catch (SQLException | IOException | WrongBankingTypeException e) {
@@ -140,10 +134,9 @@ public class CreateWithDep {
 
             ArrayList<Balance> balanceList;
             balanceList = dao.accountBalance(ss);
-            String header = "\nAcc-Num| Balance\n";
+            String header = "\nAcc-Num| Balance";
             System.out.println(header);
-            for(int i = 0; i<balanceList.size();i++)
-            {
+            for(int i = 0; i<balanceList.size();i++){
                 MemberMenu.printFormat(balanceList.get(i));
             }
         } catch (SQLException | IOException e) {

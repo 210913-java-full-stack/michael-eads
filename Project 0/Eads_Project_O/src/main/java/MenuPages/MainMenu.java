@@ -1,4 +1,4 @@
-package Menus;
+package MenuPages;
 
 import Exceptions.SsnErrorException;
 
@@ -12,25 +12,21 @@ public class MainMenu {
         clearScreen();
 
         Scanner incoming = new Scanner(System.in);
-        System.out.println("Welcome to First Mikey's Bank and Trust\n\nHow can we assist you today?" +
-                "\nLogin          (L) \nCreate Account (C) \nQuit           (Q)");
+        System.out.println("Welcome to First Mikey's Bank and Trust\n<$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>" +
+                "\n     How can we assist you today?      \n  L) Login\n  C) Create Account\n  Q) Quit");
         String input = incoming.next();
         input = Manipulation(input);
         input = input.substring(0,1);
-        if (input.equals("L"))
-        {
+        if (input.equals("L")){
             Login.login();
         }
-        else if (input.equals("C"))
-        {
+        else if (input.equals("C")){
             CreateUser.createUser();
         }
-        else if (input.equals("Q"))
-        {
+        else if (input.equals("Q")){
             System.exit(0);
         }
-        else
-        {
+        else{
             mainMenu();
         }
     }

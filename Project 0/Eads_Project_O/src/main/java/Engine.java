@@ -1,30 +1,24 @@
-import DAOs.BankingDao;
 import Exceptions.SsnErrorException;
-import Menus.MainMenu;
-import utils.ConnectionManager;
+import MenuPages.MainMenu;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Engine {
     public static void main(String args[]) throws SsnErrorException, SQLException, IOException {
         MainMenu.mainMenu();
 //VVVVVVVVVVVVVVVVVVVVVVVVV--DEBUGING--VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-//        int ss = 0;
-//            try {
-//                Connection conn = ConnectionManager.getConnection();
-//                BankingDao dao = new BankingDao(conn);
-//
-//                ss = dao.getSSN("Jason", "Smith");
-//                System.out.println(ss);
-//
-//            }
-//            catch (SQLException | IOException e) {
-//                System.out.println(e.getMessage());
-//            }
-//            System.out.println(ss);
+
+//        double money = 20.25;
+//        int ss = 4561;
+//        int id = 1;
+//        try {
+//            Connection conn = ConnectionManager.getConnection();
+//            BankingDao dao = new BankingDao(conn);
+//            int bal = dao.getAcc(ss, id);
+//            System.out.println(bal);
+//        } catch (SQLException | IOException e) {
+//            System.out.println(e.getMessage());
+//        }
     }
 }
