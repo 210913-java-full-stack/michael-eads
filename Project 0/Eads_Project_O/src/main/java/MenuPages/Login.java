@@ -1,43 +1,51 @@
 package MenuPages;
 
 import DAOs.BankingDao;
-import Exceptions.passwordFailedException;
+import models.User;
 import utils.ConnectionManager;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
-
+import static ValidationVerification.PassVerification.passVer;
 import static utils.Reformat.Manipulation;
 
 public class Login {
-    public static void login() throws SQLException, IOException {
-        String first; String last; String input;
-        System.out.println("Hello, valued customer.\nPlease enter your first name.");
+    /*
+     * Input gets the users name and password, sends the password to get verified,
+     * and creates a "User"
+     */
+    public static void  login() throws SQLException, IOException {
+        String first; String last; String input; boolean passVer = false;
+        System.out.println("<><><><><><>LOGIN<><><><><><>" +
+                "\n   Hello, valued customer.   \nPlease enter your first name.");
         Scanner incoming = new Scanner(System.in);
         input = incoming.next();
-        first = Manipulation(input);                                        //edit what they typed
-        System.out.println("Your last name?");                              //request last name
-        input = incoming.next();                                            //read whet they typed
-        last = Manipulation(input);
-
-        System.out.println("Password?");
+        first = Manipulation(input);
+        User user = new User(); user.setFirst_name(first);
+        System.out.print("Your last name?  ");
         input = incoming.next();
-        //authenticate username and password
-        try{
-            Connection conn = ConnectionManager.getConnection();
-            BankingDao dao = new BankingDao(conn);
-            if(!dao.passVer(first, last, input)){
-               System.out.println("Password failed, please try again.");
+        last = Manipulation(input);
+        user.setLast_name(last);
+        do {
+            System.out.print("Password?  ");
+            input = incoming.next();
+            passVer(user, input);
+            input.toLowerCase();
+            if(input.equals("q")){
+                Login.login();
             }
         }
-        catch (SQLException | IOException | passwordFailedException e)
-        {
-            System.out.println(e.getMessage());
-            login();
+        while (passVer(user, input) == false);
+        user.setPassword(input);
+        try {
+            Connection conn = ConnectionManager.getConnection();
+            BankingDao dao = new BankingDao(conn);
+            user.setSSN(dao.getSSN(user));
         }
-        MemberMenu.member(first,last,input);
-        //DEBUG //System.out.println(first +" "+last+" " + input);
+        catch (SQLException | IOException e) {
+            System.out.println(e.getMessage());
+        }
+        MemberMenu.member(user);
     }
 }

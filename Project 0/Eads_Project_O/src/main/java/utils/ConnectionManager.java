@@ -7,20 +7,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class ConnectionManager
-{
+public class ConnectionManager{
     public static Connection conn;
+    /*
+     * What can I say, it's the connection manager ¯\_(ツ)_/¯
+     */
 
-    private ConnectionManager()
-    {
+    private ConnectionManager(){
 
     }
-
-    public static Connection getConnection() throws IOException, SQLException
-    {
+    public static Connection getConnection() throws IOException, SQLException {
         //if connection does not exist already, we need to create one
-        if(conn == null)
-        {
+        if (conn == null) {
             Properties props = new Properties();
             //reading sensitive database information like username and password from file
             FileReader connProperties = new FileReader("src/main/resources/connections.properties");
@@ -37,10 +35,8 @@ public class ConnectionManager
             //getting the connection from the properties above
             conn = DriverManager.getConnection(connectionString);
         }
-
         //if connection exists already it will just return the preexisting connection
         //or when it's done with the if statement, it will return the one that we created
         return conn;
     }
-
 }

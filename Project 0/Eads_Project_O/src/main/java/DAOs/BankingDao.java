@@ -8,10 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import Exceptions.*;
 import models.Balance;
+import models.User;
 import utils.ConnectionManager;
 
 public class BankingDao implements bankingCrud {
-
     private Connection conn;
 
     public BankingDao(Connection conn){
@@ -26,23 +26,10 @@ public class BankingDao implements bankingCrud {
         int newId = Integer.parseInt(stringId);
         return newId;
     }
-    public int getAcc2(int acc){
-        String sId; int id;
-        String stringId = Integer.toString(acc);
 
-        String sAcc = stringId.substring(0,3);
-        String type = stringId.substring(3);
-
-        id = Integer.parseInt(type);
-        id = (id+10);
-        sId = Integer.toString(id);
-        stringId = sAcc.concat(sId);
-        int newId = Integer.parseInt(stringId);
-        return newId;
-    }
 //create
     @Override
-    public boolean newCust(String first, String last, String pw, int ss) throws SQLException {
+    public boolean newCust(User user) throws SQLException {
         Connection conn = null;
         int newId = getNewAcc();
 
@@ -50,17 +37,16 @@ public class BankingDao implements bankingCrud {
             conn = ConnectionManager.getConnection();
             String insertStatement = "INSERT INTO accounts_customers (last_four_ss, account_id) VALUES (?,?)";
             PreparedStatement preparedStatement = conn.prepareStatement(insertStatement);
-            preparedStatement.setInt(1, ss);
+            preparedStatement.setInt(1, user.getSSN());
             preparedStatement.setInt(2, newId);
             preparedStatement.executeUpdate();
-            //insert name password and social into table "customers"
-            //Name verification should have already been run
+
             insertStatement = "INSERT INTO customers (first_name, last_name, password, last_four_ss) VALUES (?,?,?,?)";
             PreparedStatement preparedInsertStatement = conn.prepareStatement(insertStatement);
-            preparedInsertStatement.setString(1, first);
-            preparedInsertStatement.setString(2, last);
-            preparedInsertStatement.setString(3, pw);
-            preparedInsertStatement.setInt(4, ss);
+            preparedInsertStatement.setString(1, user.getFirst_name());
+            preparedInsertStatement.setString(2, user.getLast_name());
+            preparedInsertStatement.setString(3, user.getPassword());
+            preparedInsertStatement.setInt(4, user.getSSN());
             preparedInsertStatement.executeUpdate();
 
             String insertStatement2 = "INSERT INTO accounts (account_id, balance) VALUES (?,?)";
@@ -68,35 +54,30 @@ public class BankingDao implements bankingCrud {
             preparedStmnt.setInt(1,newId);
             preparedStmnt.setDouble(2,0.0);
             preparedStmnt.executeUpdate();
-
         }
         catch (SQLException | IOException e){
             e.printStackTrace();
         }
-
         return true;
     }
 
     @Override
     public boolean newAcc(int ss, int id, double money) throws SQLException, WrongBankingTypeException, IOException {
         int acc = getAcc(ss, id);
-        int newAcc = getAcc2(acc);
-        //System.out.println(newAcc);
 
         conn = ConnectionManager.getConnection();
 
         String insertStatement = "INSERT INTO accounts_customers (last_four_ss, account_id) VALUES (?,?)";
         PreparedStatement preparedStatement = conn.prepareStatement(insertStatement);
         preparedStatement.setInt(1, ss);
-        preparedStatement.setInt(2, newAcc);
+        preparedStatement.setInt(2, acc);
         preparedStatement.executeUpdate();
 
         String insertStatement2 = "INSERT INTO accounts (account_id, balance) VALUES (?,?)";
         PreparedStatement preparedInsertStatement = conn.prepareStatement(insertStatement2);
-        preparedInsertStatement.setInt(1,newAcc);
+        preparedInsertStatement.setInt(1,acc);
         preparedInsertStatement.setDouble(2,money);
         preparedInsertStatement.executeUpdate();
-
         return true;
 
     }
@@ -111,41 +92,36 @@ public class BankingDao implements bankingCrud {
         while(rs.next()){
             Balance newBalance = new Balance(rs.getInt("account_id"),rs.getDouble("balance"));
             accounts.add(newBalance);
-        }return accounts;
+        }
+        return accounts;
     }
 
-
     @Override
-    public boolean custName(String fName, String lName) throws SQLException, PersonExistsException {
-        //checks to see if the person exists, if they do, throw exception
-        String nameVer = "SELECT * FROM customers WHERE (first_name = ?) AND (last_name = ?)";
+    public boolean custName(int ss) throws SQLException, PersonExistsException {
+        String nameVer = "SELECT * FROM customers WHERE (last_four_ss = ?)";
         PreparedStatement nameStatement = conn.prepareStatement(nameVer);
-        nameStatement.setString(1,fName);
-        nameStatement.setString(2,lName);
+        nameStatement.setInt(1,ss);
         ResultSet exist = nameStatement.executeQuery();
-
         if (exist.next()){
-            throw new PersonExistsException();
+            return true;
         }
         return false;
     }
 
     @Override
-    public boolean passVer(String first, String last, String pw) throws SQLException, passwordFailedException {
+    public String passVer(User user, String pw) throws SQLException, passwordFailedException {
         //Checks the password given against the DB
         String passVer = "SELECT * FROM customers WHERE (first_name = ?) AND (last_name = ?) AND (password = ?)";
         PreparedStatement pwStatement = conn.prepareStatement(passVer);
-        pwStatement.setString(1, first);
-        pwStatement.setString(2, last);
+        pwStatement.setString(1, user.getFirst_name());
+        pwStatement.setString(2, user.getLast_name());
         pwStatement.setString(3, pw);
-        ResultSet exist = pwStatement.executeQuery();
-
-        if (exist.next()){
-            return true;
+        ResultSet rs = pwStatement.executeQuery();
+        if (rs.next()){
+            String pwFile = rs.getString("password");
+            return pwFile;
         }
-        else {
-            throw new passwordFailedException();
-        }
+        return "";
     }
 
     @Override
@@ -158,12 +134,15 @@ public class BankingDao implements bankingCrud {
             return aNum;
         }return -1;
     }
+
     @Override
-    public int getSSN(String first,String last)throws SQLException{
-        String statement = "SELECT last_four_ss FROM customers WHERE (first_name = ?) AND (last_name = ?)";
+    public int getSSN(User user)throws SQLException{
+        String statement = "SELECT last_four_ss FROM customers WHERE (first_name = ?) AND " +
+                "(last_name = ?) AND (password = ?)";
         PreparedStatement getSSN = conn.prepareStatement(statement);
-        getSSN.setString(1,first);
-        getSSN.setString(2,last);
+        getSSN.setString(1,user.getFirst_name());
+        getSSN.setString(2,user.getLast_name());
+        getSSN.setString(3,user.getPassword());
         ResultSet rs = getSSN.executeQuery();
         if(rs.next()){
             int ssn = rs.getInt("last_four_ss");
@@ -173,38 +152,49 @@ public class BankingDao implements bankingCrud {
 
     @Override
     public double checkBal(int id) throws SQLException {
-
         String statement = "SELECT balance FROM accounts a WHERE account_id = ?";
         PreparedStatement checkBal = conn.prepareStatement(statement);
         checkBal.setInt(1,id);
         ResultSet rs = checkBal.executeQuery();
         while (rs.next()){
             double bal = rs.getDouble("balance");
-
             return bal;
-
-        }return -1;
+        }
+        return -1;
     }
 
     @Override
     public int getAcc(int ss, int id) throws SQLException {
-        int acc;
+        int acc = 0;
         String statement = "";
-        if(id == 1){
+        if(id == 1) {
             statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%1'";
-        }else {
-             statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%2'";
+        }
+        else{
+            statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%2'";
         }
         PreparedStatement account = conn.prepareStatement(statement);
         account.setInt(1,ss);
         ResultSet rs = account.executeQuery();
-        if(rs.next()){
+        if(rs.next()) {
             acc = rs.getInt("max (account_id)");
-            return acc;
+            int alteredAcc = (acc + 10);
+            if (acc == 0) {
+                statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%1'";
+                account = conn.prepareStatement(statement);
+                account.setInt(1, ss);
+                rs = account.executeQuery();
+                if (rs.next()) {
+                    acc = rs.getInt("max (account_id)");
+                    alteredAcc = (acc + 1);
+                }
+            }
+            return alteredAcc;
+
         }return -1;
     }
 
-    //update
+//update
     @Override
     public boolean depWith(int acc, double money) throws SQLException {
         //System.out.println("Made it to depWith");

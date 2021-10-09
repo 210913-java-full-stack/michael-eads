@@ -6,7 +6,6 @@ public class PersonDontExistsException extends Exception{
 
     {
         super ("I'm sorry, that name doesn't exist. please check spelling and try again.");
-
     }
 
 }

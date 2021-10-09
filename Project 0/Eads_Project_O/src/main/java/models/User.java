@@ -14,7 +14,6 @@ public class User {
         this.SSN = SSN;
     }
 
-;
     public String getFirst_name() {
         return first_name;
     }
