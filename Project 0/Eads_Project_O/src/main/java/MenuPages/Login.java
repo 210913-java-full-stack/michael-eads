@@ -1,6 +1,8 @@
 package MenuPages;
 
 import DAOs.BankingDao;
+import Exceptions.PersonDontExistsException;
+import Exceptions.SsnErrorException;
 import models.User;
 import utils.ConnectionManager;
 import java.io.IOException;
@@ -15,7 +17,7 @@ public class Login {
      * Input gets the users name and password, sends the password to get verified,
      * and creates a "User"
      */
-    public static void  login() throws SQLException, IOException {
+    public static void  login() throws SQLException, IOException, SsnErrorException, PersonDontExistsException {
         String first; String last; String input; boolean passVer = false;
         System.out.println("<><><><><><>LOGIN<><><><><><>" +
                 "\n   Hello, valued customer.   \nPlease enter your first name.");

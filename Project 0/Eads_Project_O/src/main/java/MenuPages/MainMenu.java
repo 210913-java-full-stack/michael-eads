@@ -1,5 +1,6 @@
 package MenuPages;
 
+import Exceptions.PersonDontExistsException;
 import Exceptions.SsnErrorException;
 import utils.WindowWasher;
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class MainMenu {
      * The input is sent through a process that capitalizes the first letter and makes all the rest
      * lowercase. Then the word is cut off after the first letter.
      */
-    public static void mainMenu() throws SsnErrorException, SQLException, IOException {
+    public static void mainMenu() throws SsnErrorException, SQLException, IOException, PersonDontExistsException {
         WindowWasher.clearScreen();
 
         Scanner incoming = new Scanner(System.in);

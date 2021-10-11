@@ -6,6 +6,16 @@ public class User {
     private String last_name;
     private String password;
 
+    public User(int SSN, String first_name, String last_name) {
+        this.SSN = SSN;
+        this.first_name = first_name;
+        this.last_name = last_name;
+    }
+
+    public User() {
+
+    }
+
     public int getSSN() {
         return SSN;
     }

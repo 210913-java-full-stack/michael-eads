@@ -1,7 +1,9 @@
 package MenuPages;
 
 import DAOs.BankingDao;
+import Exceptions.PersonDontExistsException;
 import Exceptions.PersonExistsException;
+import Exceptions.SsnErrorException;
 import models.User;
 import utils.ConnectionManager;
 import ValidationVerification.PasswordValidation;
@@ -21,15 +23,12 @@ public class CreateUser {
      * They are also given a free checking account.
      */
 
-    public static void createUser(){
-        String first = "";
-        String last = "";
-        String input ="";
-        boolean isPass = false;
-        User user = new User();
+    public static void createUser() throws PersonDontExistsException {
+        String first = ""; String last = ""; String input ="";
+        boolean isPass = false; User user = new User(); boolean ssn = false;
 
         Scanner incoming = new Scanner(System.in);
-        boolean ssn = false;
+
         while (first.length()==0) {
             System.out.println("Please enter your first name.");
             input = incoming.next();
@@ -76,7 +75,7 @@ public class CreateUser {
                 }
             }
         }
-        catch (SQLException | IOException | PersonExistsException e) {
+        catch (SQLException | IOException | PersonExistsException | SsnErrorException e) {
             System.out.println(e.getMessage());
             createUser();
         }

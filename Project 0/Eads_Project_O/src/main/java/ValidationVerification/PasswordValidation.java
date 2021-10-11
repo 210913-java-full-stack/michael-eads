@@ -4,7 +4,7 @@ public class PasswordValidation {
     /*
      * A great big thank you to Max O'Didily for the excellent video showing
      * this validation method, and to Erika Johnson for directing me to it.
-     *10/09/21  https://www.youtube.com/watch?v=kN8mqSvNFa4
+     * 10/09/21  https://www.youtube.com/watch?v=kN8mqSvNFa4
      *
      * This class takes in a string, checks the length, and then checks it to
      * make sure it has 1 capital letter, 1 lower case, and 1 number

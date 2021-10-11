@@ -6,7 +6,6 @@ public class SocialValidation {
      */
     public static boolean SocialVal(String given) {
         int length = given.length();
-        int ss = 0;
         if (length != 4) {
             System.out.println("We only need the last FOUR (4) of your social.");
             return false;

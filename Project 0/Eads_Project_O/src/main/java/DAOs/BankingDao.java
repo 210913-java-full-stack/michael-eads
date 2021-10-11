@@ -81,10 +81,21 @@ public class BankingDao implements bankingCrud {
         return true;
 
     }
-//read
+
+    @Override
+    public void linkThem(int ss, int acc) throws SQLException {
+        String insertStatement = "INSERT INTO accounts_customers (last_four_ss, account_id) VALUES (?,?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(insertStatement);
+        preparedStatement.setInt(1, ss);
+        preparedStatement.setInt(2, acc);
+        preparedStatement.executeUpdate();
+    }
+
+    //read
     @Override
     public ArrayList<Balance> accountBalance(int ss) throws SQLException {
-        String getBalance = "SELECT * FROM accounts a JOIN accounts_customers ac ON a.account_id = ac.account_id WHERE last_four_ss = ?";
+        String getBalance = "SELECT * FROM accounts a JOIN accounts_customers ac " +
+                "ON a.account_id = ac.account_id WHERE last_four_ss = ?";
         PreparedStatement balanceStatement = conn.prepareStatement(getBalance);
         balanceStatement.setInt(1,ss);
         ResultSet rs = balanceStatement.executeQuery();
@@ -168,10 +179,12 @@ public class BankingDao implements bankingCrud {
         int acc = 0;
         String statement = "";
         if(id == 1) {
-            statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%1'";
+            statement = "SELECT MAX (account_id) FROM accounts_customers ac " +
+                    "WHERE last_four_ss = ? AND account_id LIKE '%1'";
         }
         else{
-            statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%2'";
+            statement = "SELECT MAX (account_id) FROM accounts_customers ac " +
+                    "WHERE last_four_ss = ? AND account_id LIKE '%2'";
         }
         PreparedStatement account = conn.prepareStatement(statement);
         account.setInt(1,ss);
@@ -180,7 +193,8 @@ public class BankingDao implements bankingCrud {
             acc = rs.getInt("max (account_id)");
             int alteredAcc = (acc + 10);
             if (acc == 0) {
-                statement = "SELECT MAX (account_id) FROM accounts_customers ac WHERE last_four_ss = ? AND account_id LIKE '%1'";
+                statement = "SELECT MAX (account_id) FROM accounts_customers ac " +
+                        "WHERE last_four_ss = ? AND account_id LIKE '%1'";
                 account = conn.prepareStatement(statement);
                 account.setInt(1, ss);
                 rs = account.executeQuery();
@@ -194,7 +208,45 @@ public class BankingDao implements bankingCrud {
         }return -1;
     }
 
-//update
+    @Override
+    public User fetchDeets(String first, String last, int ssn) throws SQLException, PersonDontExistsException {
+        String getBalance = "SELECT * FROM customers c WHERE (first_name = ?) AND (last_name = ?) AND last_four_ss = ?";
+        PreparedStatement balanceStatement = conn.prepareStatement(getBalance);
+        balanceStatement.setString(1,first);
+        balanceStatement.setString(2,last);
+        balanceStatement.setInt(3,ssn);
+        ResultSet rs = balanceStatement.executeQuery();
+        if(rs.next()){
+            User user2 = new User(rs.getInt("last_four_ss"),rs.getString("first_name"),rs.getString("last_name"));
+            return user2;
+        }
+        else
+        {
+            throw new PersonDontExistsException();
+        }
+    }
+
+    @Override
+    public int fetchDeets2(String first, String last, int acc) throws SQLException, PersonDontExistsException {
+        String getBalance = "SELECT c.last_four_ss FROM customers c " +
+                "JOIN accounts_customers ac ON c.last_four_ss = ac.last_four_ss\n" +
+                "JOIN accounts a ON ac.account_id = a.account_id WHERE first_name = ? " +
+                "AND last_name = ? AND a.account_id = ?";
+        PreparedStatement balanceStatement = conn.prepareStatement(getBalance);
+        balanceStatement.setString(1,first);
+        balanceStatement.setString(2,last);
+        balanceStatement.setInt(3,acc);
+        ResultSet rs = balanceStatement.executeQuery();
+        if(rs.next()) {
+            int ssn = rs.getInt("last_four_ss");
+            return ssn;
+        }
+        else {
+            throw new PersonDontExistsException();
+        }
+    }
+
+    //update
     @Override
     public boolean depWith(int acc, double money) throws SQLException {
         //System.out.println("Made it to depWith");
@@ -206,7 +258,7 @@ public class BankingDao implements bankingCrud {
         return true;
     }
 
-//delete
+    //delete
     @Override
     public boolean closeAccount(int id) throws SQLException {
         return false;
